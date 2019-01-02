@@ -1,0 +1,34 @@
+How to install
+
+In order to prevent the browser from showing the SSL security warning, the .crt file needs to be added to your local Trusted Certificate Store.
+
+On Windows
+-- Run "mmc" - right-click the Windows icon on the task bar, and click the "Run" selection. This will open the management console to import the Certificate
+-- Select "Certificates"
+   -- File
+   -- Add/Remove Snap-ins...
+   -- Select "Certificates" in the left pane
+   -- Click "Add"
+   -- Select "Computer Account"
+   -- Click Next, then Finish, then click Ok
+-- Expand the Certificates item in the tree view on the left
+   -- Expand "Trusted Root Certification Authorities"
+   -- Select the "Certificates" folder - you should see a list of certificates installed on your machine
+   -- Right-click the "Certificates" folder and choose "All Tasks" then "Import"
+   -- "Local Machine" should be selected, click "Next"
+   -- Browse to the /ssl folder in the root of the Angular app and choose the .crt file
+   -- The "Trusted Root Certification Authorities" selection should be chosen, click Next
+   -- Click "Finish" - the certificate will be added to your local certificate Store
+
+That's it!
+
+Now when you run the Angular app, enter the https://... and the sites should be secure.
+
+
+On Mac
+Unfortunately I don't have the instructions for installing the certificate on a Mac but I'm sure there are instructions on the web for this.
+
+
+
+
+
