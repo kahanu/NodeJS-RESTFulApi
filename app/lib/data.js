@@ -5,27 +5,42 @@ var lib = {};
 
 lib.baseDir = path.join(__dirname, '/../.data/');
 
-lib.create = function(dir, file, data, cb) {
-    fs.open(lib.baseDir + dir + '/' + file + '.json', 'wx', function(err, fileDescriptor) {
-        if (!err && fileDescriptor) {
-            var stringData = JSON.stringify(data);
-
-            fs.writeFile(fileDescriptor, stringData, function(err) {
-                if (!err) {
-                    fs.close(fileDescriptor, function(err) {
-                        if (!err) {
-                            cb(false);
-                        } else {
-                            cb('Error closing file.');
-                        }
-                    });
-                } else {
-                    cb('Error writing to new file.');
-                }
-            });
+/**
+ * Check if the directory exists, otherwise create it and run the callback.
+ */
+lib._directoryExists = function(dir, cb) {
+    fs.stat(lib.baseDir + dir, function(err) {
+        if (!err) {
+            cb();
         } else {
-            cb('Could not create file, it may already exist.', err);
+            fs.mkdir(lib.baseDir + dir, cb);
         }
+    });
+};
+
+lib.create = function(dir, file, data, cb) {
+    lib._directoryExists(dir, function() {
+        fs.open(lib.baseDir + dir + '/' + file + '.json', 'wx', function(err, fileDescriptor) {
+            if (!err && fileDescriptor) {
+                var stringData = JSON.stringify(data);
+    
+                fs.writeFile(fileDescriptor, stringData, function(err) {
+                    if (!err) {
+                        fs.close(fileDescriptor, function(err) {
+                            if (!err) {
+                                cb(false);
+                            } else {
+                                cb('Error closing file.');
+                            }
+                        });
+                    } else {
+                        cb('Error writing to new file.');
+                    }
+                });
+            } else {
+                cb('Could not create file, it may already exist.', err);
+            }
+        });        
     });
 };
 
