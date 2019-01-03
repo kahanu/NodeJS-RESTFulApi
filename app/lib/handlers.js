@@ -67,9 +67,69 @@ handlers._users.post = function(data, cb) {
   }
 };
 
-handlers._users.put = function(data, cb) {};
+// @TODO - authenticate user
+handlers._users.put = function(data, cb) {
+    // required
+    var sanitizedPhone = helpers.sanitizePhone(data.payload.phone);
+    if (!sanitizedPhone) { return cb(500, { 'Error': 'Phone number is missing.' }); }
+  
+      var phone = typeof sanitizedPhone === "string" && sanitizedPhone.length === 10 ? sanitizedPhone : false;
 
-handlers._users.delete = function(data, cb) {};
+    // optional
+    var firstName = typeof data.payload.firstName === "string" && data.payload.firstName.trim().length > 0 ? data.payload.firstName.trim() : false;
+    var lastName = typeof data.payload.lastName === "string" && data.payload.lastName.trim().length > 0 ? data.payload.lastName.trim() : false;
+    var password = typeof data.payload.password === "string" && data.payload.password.trim().length > 0 ? data.payload.password.trim() : false;
+
+    if (phone) {
+        if (firstName || lastName || password) {
+            _data.read('users', phone, function(err, userData) {
+                if (!err && userData) {
+                    if (firstName) { userData.firstName = firstName; }
+                    if (lastName) { userData.lastName = lastName; }
+                    if (password) { 
+                        userData.hashedPassword = helpers.hash(password); 
+                    }
+
+                    _data.update('users', phone, userData, function(err) {
+                        if (!err) {
+                            cb(200);
+                        } else {
+                            cb(500, { 'Error': 'Could not update user.' });
+                        }
+                    });
+                } else {
+                    cb(400, { 'Error': 'User does not exist.' });
+                }
+            });
+        } else {
+            cb(400, { 'Error': 'Missing optional fields to update.' });
+        }
+    } else {
+        cb(400, { 'Error': 'Missing required field (Phone).'});
+    }
+};
+
+// @TODO - authenticate user
+handlers._users.delete = function(data, cb) {
+    var phone = typeof(data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone : false;
+    if (phone) {
+        _data.read('users', phone, function(err, response) {
+            if (!err && response) {
+                _data.delete('users', phone, function(err) {
+                    if (!err) {
+                        cb(200);
+                    } else {
+                        cb(500, { 'Error': 'Could not delete the user.' });
+                    }
+                });
+            } else {
+                cb(400, { 'Error': 'Could not find the user.' });
+            }
+        });
+    } else {
+        cb(400, { 'Error': 'Phone number is missing.' });
+    }
+};
 
 handlers.users = function(data, cb) {
   var acceptableMethods = ["post", "get", "put", "delete"];
