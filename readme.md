@@ -29,7 +29,7 @@ Open Postman and navigate to `http://localhost:3000/hello`.  You should see:
         "message": "Hello Pirple!"
     }
 
-If you POST and object with a name property, you'll see that change the message:
+If you POST and object with a name property, like this:
 
     {
         "name": "John"
