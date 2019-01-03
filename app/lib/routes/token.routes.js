@@ -63,7 +63,34 @@ tokenRoutes._tokens.post = function(data, cb) {
   }
 };
 
-tokenRoutes._tokens.put = function(data, cb) {};
+tokenRoutes._tokens.put = function(data, cb) {
+  var id = typeof data.payload.id === 'string' && data.payload.id.trim().length === 20 ? data.payload.id.trim() : false;
+  var extend = typeof data.payload.extend === 'boolean' && data.payload.extend === true ? true : false;
+
+  if (id && extend) {
+    _data.read('tokens', id, function(err, tokenData) {
+      if (!err && tokenData) {
+        if (tokenData.expires > Date.now()) {
+          tokenData.expires = Date.now() + 1000 * 60 * 60;
+
+          _data.update('tokens', id, tokenData, function(err) {
+            if (!err) {
+              cb(200);
+            } else {
+              cb(500, { 'Error': 'Could not update the token.' });
+            }
+          });
+        } else {
+          cb(400, { 'Error': 'The token has already expired and cannot be extended.' });
+        }
+      } else {
+        cb(400, { 'Error': 'Could not find the token.' });
+      }
+    });
+  } else {
+    cb(400, { 'Error': 'Missing token fields.' });
+  }
+};
 
 tokenRoutes._tokens.delete = function(data, cb) {};
 
