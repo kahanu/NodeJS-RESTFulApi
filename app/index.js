@@ -4,6 +4,8 @@ var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
 var config = require('./config');
 var fs = require('fs');
+var handlers = require('./lib/handlers');
+var helpers = require('./lib/helpers');
 
 var httpServer = http.createServer(function(req, res) {
     unifiedServer(req, res);
@@ -47,7 +49,7 @@ var unifiedServer = function(req, res) {
             'method': method,
             'queryString': queryString,
             'headers': headers,
-            'payload': buffer
+            'payload': helpers.parseJsonToObject(buffer)
         };
 
         chosenHandler(data, function(statusCode, payload) {
@@ -64,42 +66,9 @@ var unifiedServer = function(req, res) {
     }); 
 };
 
-
-var handlers = {};
-
-handlers.hello = function(data, cb) {
-    var message = 'Pirple';
-
-    if (data.method === 'post') {
-        var payload = JSON.parse(data.payload);
-        if (payload.name) {
-            message = payload.name;
-        } else {
-            message = 'Pirple! (Hint: create a name property with your name on the request object.)';
-        }
-    }
-
-    var qs = JSON.parse(JSON.stringify(data.queryString));
-    if (data.method === 'get' && qs.name) {
-        message = qs.name;
-    } 
-
-    var response = {
-        'message': `Hello ${message}!`
-    };
-    cb(200, response);
-};
-
-handlers.ping = function(data, cb) {
-    cb(200, { 'message': 'Still alive!' });
-};
-
-handlers.notFound = function(data, cb) {
-    cb(404);
-};
-
 var router = {
     'ping': handlers.ping,
-    'hello': handlers.hello
+    'hello': handlers.hello,
+    'users': handlers.users
 };
 
