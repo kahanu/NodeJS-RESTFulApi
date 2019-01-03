@@ -6,7 +6,7 @@ var config = require('./lib/config');
 var fs = require('fs');
 var handlers = require('./lib/handlers');
 var helpers = require('./lib/helpers');
-var greetingRoute = require('./lib/routes/greeting.routes');
+var greetingRoutes = require('./lib/routes/greeting.routes');
 var userRoutes = require('./lib/routes/user.routes');
 var tokenRoutes = require('./lib/routes/token.routes');
 
@@ -44,7 +44,6 @@ var unifiedServer = function(req, res) {
         buffer += decoder.write(data);
     });
     req.on('end', function() {
-        console.log('trimmed path: ', trimmedPath);
         buffer += decoder.end();
         var chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
 
@@ -75,7 +74,7 @@ var unifiedServer = function(req, res) {
  */
 var router = {
     'ping': handlers.ping,
-    'hello': greetingRoute.hello,
+    'hello': greetingRoutes.hello,
     'users': userRoutes.users,
     'token': tokenRoutes.tokens
 };

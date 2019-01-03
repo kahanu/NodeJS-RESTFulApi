@@ -46,7 +46,7 @@ helpers.createRandomString = function(strLength) {
         var possibleCharacters = 'abcdefghijklmnopqrstuvwxyz0123456789';
         var result = '';
 
-        for (let i = 0; i <= len; i++) {
+        for (let i = 0; i < len; i++) {
             var randomCharacter = possibleCharacters.charAt(Math.floor(Math.random() * possibleCharacters.length));
             result += randomCharacter;
         }
