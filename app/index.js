@@ -68,7 +68,7 @@ var unifiedServer = function(req, res) {
 var handlers = {};
 
 handlers.hello = function(data, cb) {
-    var message = '';
+    var message = 'Pirple';
 
     if (data.method === 'post') {
         var payload = JSON.parse(data.payload);
@@ -79,9 +79,10 @@ handlers.hello = function(data, cb) {
         }
     }
 
-    if (data.method === 'get' && data.queryString) {
-        message = JSON.parse(JSON.stringify(data.queryString)).name;
-    }
+    var qs = JSON.parse(JSON.stringify(data.queryString));
+    if (data.method === 'get' && qs.name) {
+        message = qs.name;
+    } 
 
     var response = {
         'message': `Hello ${message}!`
