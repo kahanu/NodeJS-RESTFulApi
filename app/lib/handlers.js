@@ -9,7 +9,22 @@ var handlers = {};
  */
 handlers._users = {};
 
-handlers._users.get = function(data, cb) {};
+// @TODO: authenticate user
+handlers._users.get = function(data, cb) {
+    var phone = typeof(data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone : false;
+    if (phone) {
+        _data.read('users', phone, function(err, response) {
+            if (!err && response) {
+                delete response.hashedPassword;
+                cb(200, response);
+            } else {
+                cb(404);
+            }
+        });
+    } else {
+        cb(400, { 'Error': 'Phone number is missing.' });
+    }
+};
 
 handlers._users.post = function(data, cb) {
   var sanitizedPhone = helpers.sanitizePhone(data.payload.phone);
@@ -30,7 +45,7 @@ handlers._users.post = function(data, cb) {
             firstName: firstName,
             lastName: lastName,
             phone: sanitizedPhone,
-            password: hashedPassword,
+            hashedPassword: hashedPassword,
             tosAgreement: true
           };
           _data.create("users", phone, userObject, function(err) {
