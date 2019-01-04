@@ -11,14 +11,21 @@ userRoutes._users = {};
 userRoutes._users.get = function(data, cb) {
     var phone = typeof(data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone : false;
     if (phone) {
-        _data.read('users', phone, function(err, response) {
-            if (!err && response) {
-                delete response.hashedPassword;
-                cb(200, response);
+        helpers.verifyToken(data, _data, function(tokenIsValid) {
+            if (tokenIsValid) {
+                _data.read('users', phone, function(err, response) {
+                    if (!err && response) {
+                        delete response.hashedPassword;
+                        cb(200, response);
+                    } else {
+                        cb(404);
+                    }
+                });        
             } else {
-                cb(404);
+                cb(403);
             }
         });
+
     } else {
         cb(400, { 'Error': 'Phone number is missing.' });
     }
@@ -80,23 +87,29 @@ userRoutes._users.put = function(data, cb) {
 
     if (phone) {
         if (firstName || lastName || password) {
-            _data.read('users', phone, function(err, userData) {
-                if (!err && userData) {
-                    if (firstName) { userData.firstName = firstName; }
-                    if (lastName) { userData.lastName = lastName; }
-                    if (password) { 
-                        userData.hashedPassword = helpers.hash(password); 
-                    }
+            helpers.verifyToken(data, _data, function (tokenIsValid) {
+                if (tokenIsValid) {
+                    _data.read('users', phone, function (err, userData) {
+                        if (!err && userData) {
+                            if (firstName) { userData.firstName = firstName; }
+                            if (lastName) { userData.lastName = lastName; }
+                            if (password) {
+                                userData.hashedPassword = helpers.hash(password);
+                            }
 
-                    _data.update('users', phone, userData, function(err) {
-                        if (!err) {
-                            cb(200);
+                            _data.update('users', phone, userData, function (err) {
+                                if (!err) {
+                                    cb(200);
+                                } else {
+                                    cb(500, { 'Error': 'Could not update user.' });
+                                }
+                            });
                         } else {
-                            cb(500, { 'Error': 'Could not update user.' });
+                            cb(400, { 'Error': 'User does not exist.' });
                         }
                     });
                 } else {
-                    cb(400, { 'Error': 'User does not exist.' });
+                    cb(403);
                 }
             });
         } else {
@@ -111,17 +124,23 @@ userRoutes._users.put = function(data, cb) {
 userRoutes._users.delete = function(data, cb) {
     var phone = typeof(data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone : false;
     if (phone) {
-        _data.read('users', phone, function(err, response) {
-            if (!err && response) {
-                _data.delete('users', phone, function(err) {
-                    if (!err) {
-                        cb(200);
+        helpers.verifyToken(data, _data, function (tokenIsValid) {
+            if (tokenIsValid) {
+                _data.read('users', phone, function (err, response) {
+                    if (!err && response) {
+                        _data.delete('users', phone, function (err) {
+                            if (!err) {
+                                cb(200);
+                            } else {
+                                cb(500, { 'Error': 'Could not delete the user.' });
+                            }
+                        });
                     } else {
-                        cb(500, { 'Error': 'Could not delete the user.' });
+                        cb(400, { 'Error': 'Could not find the user.' });
                     }
                 });
             } else {
-                cb(400, { 'Error': 'Could not find the user.' });
+                cb(403);
             }
         });
     } else {

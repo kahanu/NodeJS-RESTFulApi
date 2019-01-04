@@ -15,14 +15,14 @@ tokenRoutes._tokens.get = function(data, cb) {
       }
     });
   } else {
-    cb(400, { Error: 'Token is missing.' });
+    cb(400, { 'Error': 'Token is missing.' });
   }
 };
 
 tokenRoutes._tokens.post = function(data, cb) {
   var sanitizedPhone = helpers.sanitizePhone(data.payload.phone);
   if (!sanitizedPhone) {
-    return cb(500, { Error: 'Phone number is missing.' });
+    return cb(500, { 'Error': 'Phone number is missing.' });
   }
 
   var phone = typeof sanitizedPhone === 'string' && sanitizedPhone.length === 10 ? sanitizedPhone : false;
@@ -46,7 +46,7 @@ tokenRoutes._tokens.post = function(data, cb) {
             if (!err) {
               cb(200, token);
             } else {
-              cb(500, { Error: 'Could not create token.' });
+              cb(500, { 'Error': 'Could not create token.' });
             }
           });
         } else {
@@ -55,11 +55,11 @@ tokenRoutes._tokens.post = function(data, cb) {
           cb(403);
         }
       } else {
-        cb(400, { Error: 'Could not find the user.' });
+        cb(400, { 'Error': 'Could not find the user.' });
       }
     });
   } else {
-    cb(400, { Error: 'Missing required fields.' });
+    cb(400, { 'Error': 'Missing required fields.' });
   }
 };
 
@@ -81,7 +81,9 @@ tokenRoutes._tokens.put = function(data, cb) {
             }
           });
         } else {
-          cb(400, { 'Error': 'The token has already expired and cannot be extended.' });
+          cb(400, {
+            Error: 'The token has already expired and cannot be extended.'
+          });
         }
       } else {
         cb(400, { 'Error': 'Could not find the token.' });
@@ -92,7 +94,26 @@ tokenRoutes._tokens.put = function(data, cb) {
   }
 };
 
-tokenRoutes._tokens.delete = function(data, cb) {};
+tokenRoutes._tokens.delete = function(data, cb) {
+  var id = typeof data.queryString.id === 'string' && data.queryString.id.trim().length === 20 ? data.queryString.id.trim() : false;
+  if (id) {
+    _data.read('tokens', id, function(err, response) {
+      if (!err && response) {
+        _data.delete('tokens', id, function(err) {
+          if (!err) {
+            cb(200);
+          } else {
+            cb(500, { 'Error': 'Could not delete the token.' });
+          }
+        });
+      } else {
+        cb(400, { 'Error': 'Could not find the token.' });
+      }
+    });
+  } else {
+    cb(400, { 'Error': 'Id is missing.' });
+  }
+};
 
 tokenRoutes.tokens = function(data, cb) {
   var acceptableMethods = ['post', 'get', 'put', 'delete'];
