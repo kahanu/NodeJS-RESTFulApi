@@ -11,18 +11,9 @@ checksRoutes._checks.get = function(data, cb) {
     if (tokenId) {
         _data.read('checks', tokenId, function(err, checkData) {
             if (!err && checkData) {
-                // This is wonky but necessary since I build the external verifyToken method this way.
-                checkData.headers = {};
-                checkData.headers.token = {};
-                checkData.queryString = {};
-                checkData.headers.token = data.headers.token;
-                checkData.queryString.phone = checkData.userPhone;
-
-                helpers.verifyToken(checkData, _data, function(tokenIsValid) {
+                var tokenRequest = helpers.createTokenRequest(data.headers.token, checkData.userPhone);
+                helpers.verifyToken(tokenRequest, _data, function(tokenIsValid) {
                     if (tokenIsValid) {
-                        // Also wonky.
-                        delete checkData.headers;
-                        delete checkData.queryString;
                         cb(200, checkData);
                     } else {
                         cb(403);
@@ -101,7 +92,35 @@ checksRoutes._checks.post = function(data, cb) {
 };
 
 checksRoutes._checks.put = function(data, cb) {
+    var tokenId = typeof data.payload.id === 'string' && data.payload.id.trim().length === 20 ? data.payload.id : false;
+    var protocol = typeof(data.payload.protocol) === 'string' && ['http','https'].indexOf(data.payload.protocol) > -1 ? data.payload.protocol : false;
+    var url = typeof data.payload.url === 'string' && data.payload.url.trim().length > 0 ? data.payload.url.trim() : false;
+    var method = typeof(data.payload.method) === 'string' && ['get','put','post','delete'].indexOf(data.payload.method) > -1 ? data.payload.method : false;
+    var successCodes = typeof data.payload.successCodes === 'object' && data.payload.successCodes instanceof Array && data.payload.successCodes.length > 0 ? data.payload.successCodes : false;
+    var timeoutSeconds = typeof data.payload.timeoutSeconds === 'number' && data.payload.timeoutSeconds >= 1 && data.payload.timeoutSeconds <= 5 ? data.payload.timeoutSeconds : false;
 
+    if (tokenId) {
+        if (protocol || url || method || successCodes || timeoutSeconds) {
+            _data.read('checks', tokenId, function(err, checkData) {
+                if (!err && checkData) {
+                    var tokenRequest = helpers.createTokenRequest(data.headers.token, checkData.userPhone);
+                    helpers.verifyToken(tokenRequest, _data, function(tokenIsValid) {
+                        if (tokenIsValid) {
+                            cb(200, checkData);
+                        } else {
+                            cb(403);
+                        }
+                    });
+                } else {
+                    cb(404);
+                }
+            });
+        } else {
+            cb(400, { 'Error': 'Missing required inputs or inputs are invalid.' });
+        }
+    } else {
+        cb(400, { 'Error': 'Missing id.' });
+    }
 };
 
 checksRoutes._checks.delete = function(data, cb) {

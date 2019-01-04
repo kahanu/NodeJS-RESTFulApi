@@ -11,7 +11,9 @@ userRoutes._users = {};
 userRoutes._users.get = function(data, cb) {
     var phone = typeof(data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone : false;
     if (phone) {
-        helpers.verifyToken(data, _data, function(tokenIsValid) {
+
+        var tokenRequest = helpers.createTokenRequest(data.headers.token, data.queryString.phone);
+        helpers.verifyToken(tokenRequest, _data, function(tokenIsValid) {
             if (tokenIsValid) {
                 _data.read('users', phone, function(err, response) {
                     if (!err && response) {
@@ -87,7 +89,8 @@ userRoutes._users.put = function(data, cb) {
 
     if (phone) {
         if (firstName || lastName || password) {
-            helpers.verifyToken(data, _data, function (tokenIsValid) {
+            var tokenRequest = helpers.createTokenRequest(data.headers.token, sanitizedPhone);
+            helpers.verifyToken(tokenRequest, _data, function (tokenIsValid) {
                 if (tokenIsValid) {
                     _data.read('users', phone, function (err, userData) {
                         if (!err && userData) {
@@ -124,7 +127,8 @@ userRoutes._users.put = function(data, cb) {
 userRoutes._users.delete = function(data, cb) {
     var phone = typeof(data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone : false;
     if (phone) {
-        helpers.verifyToken(data, _data, function (tokenIsValid) {
+        var tokenRequest = helpers.createTokenRequest(data.headers.token, phone);
+        helpers.verifyToken(tokenRequest, _data, function (tokenIsValid) {
             if (tokenIsValid) {
                 _data.read('users', phone, function (err, response) {
                     if (!err && response) {

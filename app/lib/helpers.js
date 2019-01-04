@@ -59,7 +59,23 @@ helpers.createRandomString = function(strLength) {
 };
 
 /**
- * Public helper method to get the token from the header.
+ * Create the Verify Token request that contains the necessary data, tokenId and phone.
+ * @param token The object with the tokenId
+ * @param phone The object with the phone number
+ * @example Token: { token: 'usfafuh9o0759x4xwtoh' }
+ * @example Phone: { phone: '8185552222' }
+ */
+helpers.createTokenRequest = function(token, phone) {
+    var request = {};
+
+    request.tokenId = token;
+    request.phone = phone;
+
+    return request;
+};
+
+/**
+ * Deprecated. Public helper method to get the token from the header.
  */
 helpers.getTokenFromHeader = function(data) {
     return typeof(data.headers.token) === 'string' ? data.headers.token : false;
@@ -67,17 +83,15 @@ helpers.getTokenFromHeader = function(data) {
 
 /**
  * Encapsulate the verify token method.
- * @param data The incoming data object.
+ * @param tokenRequest Any object containing the tokenId and user phone.
  * @param dataService The global file system _data service.
  * @param cb The callback.
  */
-helpers.verifyToken = function (data, dataService, cb) {
-    var tokenId = helpers.getTokenFromHeader(data);
-    var phone = typeof (data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone.trim() : false;    
-    
-    dataService.read('tokens', tokenId, function (err, tokenData) {
+helpers.verifyToken = function (tokenRequest, dataService, cb) {
+    // console.log('token request: ', tokenRequest);
+    dataService.read('tokens', tokenRequest.tokenId, function (err, tokenData) {
         if (!err && tokenData) {
-            if (tokenData.phone === phone && tokenData.expires > Date.now()) {
+            if (tokenData.phone === tokenRequest.phone && tokenData.expires > Date.now()) {
                 cb(true);
             } else {
                 cb(false);
