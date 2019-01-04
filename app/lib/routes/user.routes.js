@@ -130,11 +130,31 @@ userRoutes._users.delete = function(data, cb) {
         var tokenRequest = helpers.createTokenRequest(data.headers.token, phone);
         helpers.verifyToken(tokenRequest, _data, function (tokenIsValid) {
             if (tokenIsValid) {
-                _data.read('users', phone, function (err, response) {
-                    if (!err && response) {
+                _data.read('users', phone, function (err, userData) {
+                    if (!err && userData) {
                         _data.delete('users', phone, function (err) {
                             if (!err) {
-                                cb(200);
+                                var userChecks = typeof userData.checks === 'object' && userData.checks instanceof Array ? userData.checks : [];
+                                var checksToDelete = userChecks.length;
+                                if (checksToDelete > 0) {
+                                    var checksDeleted = 0;
+                                    var deletionErrors = false;
+                                    userChecks.forEach(item => {
+                                        _data.delete('checks', item, function(err) {
+                                            if(err) deletionErrors = true;
+                                            checksDeleted++;
+                                            if (checksDeleted === checksToDelete) {
+                                                if (!deletionErrors) {
+                                                    cb(200);
+                                                } else {
+                                                    cb(500, { 'Error': 'Errors attempting to delete user checks.' });
+                                                }
+                                            } 
+                                        });
+                                    });
+                                } else {
+                                    cb(200);    
+                                }
                             } else {
                                 cb(500, { 'Error': 'Could not delete the user.' });
                             }
