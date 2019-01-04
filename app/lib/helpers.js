@@ -1,6 +1,7 @@
 var crypto = require('crypto');
 var config = require('./config');
-// var _data = require('./data');
+var querystring = require('querystring');
+var https = require('https');
 
 var helpers = {};
 
@@ -101,6 +102,54 @@ helpers.verifyToken = function (tokenRequest, dataService, cb) {
             cb(false);
         }
     });
+};
+
+/**
+ * Send SMS text messages via Twilio.
+ */
+helpers.sendTwilioSms = function(phone, msg, cb) {
+    var sanitizedPhone = helpers.sanitizePhone(phone);
+    var newphone = typeof sanitizedPhone === 'string' && sanitizedPhone.length === 10 ? sanitizedPhone : false;
+    msg = typeof msg === 'string' && msg.trim().length > 0 ? msg.trim() : false;
+    if (newphone && msg) {
+        var payload = {
+            'From': config.twilio.fromPhone,
+            'To': '+1' + newphone,
+            'Body': msg
+        };
+        var stringPayload = querystring.stringify(payload);
+        var requestDetails = {
+            'protocol': 'https:',
+            'hostname': 'api.twilio.com',
+            'method': 'POST',
+            'path': `/2010-04-01/Accounts/${config.twilio.accountSid}/Messages.json`,
+            'auth': config.twilio.accountSid + ':' + config.twilio.authToken,
+            'headers': {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(stringPayload)
+            }
+        };
+
+        var req = https.request(requestDetails, function(res) {
+            var status = res.statusCode;
+            if (status === 200 || status === 201) {
+                cb(false);
+            } else {
+                cb(`Status code was ${status}.`);
+            }
+        });
+
+        req.on('error', function(e) {
+            cb(e);
+        });
+
+        req.write(stringPayload);
+
+        req.end();
+
+    } else {
+        cb('Given parameters are missing or invalid.');
+    }
 };
 
 
