@@ -9,6 +9,7 @@ var helpers = require('./lib/helpers');
 var greetingRoutes = require('./lib/routes/greeting.routes');
 var userRoutes = require('./lib/routes/user.routes');
 var tokenRoutes = require('./lib/routes/token.routes');
+var checksRoutes = require('./lib/routes/checks.routes');
 
 var httpServer = http.createServer(function(req, res) {
     unifiedServer(req, res);
@@ -76,6 +77,7 @@ var router = {
     'ping': handlers.ping,
     'hello': greetingRoutes.hello,
     'users': userRoutes.users,
-    'token': tokenRoutes.tokens
+    'token': tokenRoutes.tokens,
+    'checks': checksRoutes.checks
 };
 

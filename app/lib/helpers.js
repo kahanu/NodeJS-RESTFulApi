@@ -59,9 +59,9 @@ helpers.createRandomString = function(strLength) {
 };
 
 /**
- * Private helper method to get the token from the header.
+ * Public helper method to get the token from the header.
  */
-helpers._getTokenFromHeader = function(data) {
+helpers.getTokenFromHeader = function(data) {
     return typeof(data.headers.token) === 'string' ? data.headers.token : false;
 };
 
@@ -72,10 +72,10 @@ helpers._getTokenFromHeader = function(data) {
  * @param cb The callback.
  */
 helpers.verifyToken = function (data, dataService, cb) {
-    var id = helpers._getTokenFromHeader(data);
-    var phone = typeof (data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone.trim() : false;
-
-    dataService.read('tokens', id, function (err, tokenData) {
+    var tokenId = helpers.getTokenFromHeader(data);
+    var phone = typeof (data.queryString.phone) === 'string' && data.queryString.phone.trim().length === 10 ? data.queryString.phone.trim() : false;    
+    
+    dataService.read('tokens', tokenId, function (err, tokenData) {
         if (!err && tokenData) {
             if (tokenData.phone === phone && tokenData.expires > Date.now()) {
                 cb(true);
