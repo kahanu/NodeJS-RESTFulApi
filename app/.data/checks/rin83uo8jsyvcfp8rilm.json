@@ -1,1 +1,1 @@
-{"id":"rin83uo8jsyvcfp8rilm","userPhone":"8185552222","protocol":"http","url":"kingwilder.com","method":"get","successCodes":[200,201],"timeoutSeconds":5}
+{"id":"rin83uo8jsyvcfp8rilm","userPhone":"8185552222","protocol":"https","url":"gizmobeach.com","method":"put","successCodes":[200,201,403],"timeoutSeconds":3}

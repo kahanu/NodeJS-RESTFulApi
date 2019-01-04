@@ -106,7 +106,19 @@ checksRoutes._checks.put = function(data, cb) {
                     var tokenRequest = helpers.createTokenRequest(data.headers.token, checkData.userPhone);
                     helpers.verifyToken(tokenRequest, _data, function(tokenIsValid) {
                         if (tokenIsValid) {
-                            cb(200, checkData);
+                            if (protocol) { checkData.protocol = protocol; }
+                            if (url) { checkData.url = url; }
+                            if (method) { checkData.method = method; }
+                            if (successCodes) { checkData.successCodes = successCodes; }
+                            if (timeoutSeconds) { checkData.timeoutSeconds = timeoutSeconds; }
+
+                            _data.update('checks', tokenId, checkData, function(err) {
+                                if (!err) {
+                                    cb(200);
+                                } else {
+                                    cb(400, { 'Error': 'Could not upddate the check.' });
+                                }
+                            });
                         } else {
                             cb(403);
                         }
@@ -124,7 +136,50 @@ checksRoutes._checks.put = function(data, cb) {
 };
 
 checksRoutes._checks.delete = function(data, cb) {
-
+    var checkId = typeof data.queryString.id === 'string' && data.queryString.id.trim().length === 20 ? data.queryString.id : false;
+    if (checkId) {
+        _data.read('checks', checkId, function(err, checkData) {
+            if (!err && checkData) {
+                var tokenRequest = helpers.createTokenRequest(data.headers.token, checkData.userPhone);
+                helpers.verifyToken(tokenRequest, _data, function(tokenIsValid) {
+                    if (tokenIsValid) {
+                        _data.delete('checks', checkId, function(err) {
+                            if (!err) {
+                                _data.read('users', checkData.userPhone, function(err, userData) {
+                                    if (!err && userData) {
+                                        var userChecks = typeof userData.checks === 'object' && userData.checks instanceof Array ? userData.checks : [];
+                                        var checkPosition = userChecks.indexOf(checkId);
+                                        if (checkPosition > -1) {
+                                            userChecks.splice(checkPosition, 1);
+                                            _data.update('users', checkData.userPhone, userData, function(err) {
+                                                if (!err) {
+                                                    cb(200);
+                                                } else {
+                                                    cb(500, { 'Error': 'Could not update the user.' });
+                                                }
+                                            });
+                                        } else {
+                                            cb(500, { 'Error': 'Could not find the check to delete.' });
+                                        }
+                                    } else {
+                                        cb(400, { 'Error': 'Could not find the user.' });
+                                    }
+                                });
+                            } else {
+                                cb(500, { 'Error': 'Could not delete the check.' });
+                            }
+                        });
+                    } else {
+                        cb(403);
+                    }
+                });
+            } else {
+                cb(400, { 'Error': 'The check id does not exist.' });
+            }
+        });
+    } else {
+        cb(403);
+    }
 };
 
 checksRoutes.checks = function(data, cb) {
