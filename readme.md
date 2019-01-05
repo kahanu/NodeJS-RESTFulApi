@@ -1,6 +1,6 @@
 # NodeJS RESTFul Api
 
-Updated: 1/3/2019
+Updated: 1/4/2019
 
 This is an ongoing project where I build a NodeJS application from scratch with no dependencies.
 
@@ -54,5 +54,9 @@ If you add a QUERYSTRING parameter such as:
 2. Token
 
 Completed the token section and added some of my own modifications to be a little more DRY.  I also extracted out the Users and Token routes into their own files for easier route maintenance.
+
+3. Workers and Refactor
+
+Created the worker processes and tested them and they work.
 
 Have fun!
