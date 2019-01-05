@@ -98,7 +98,7 @@ lib.delete = function(dir, file, cb) {
 
 lib.list = function(dir, cb) {
     fs.readdir(lib.baseDir + dir + '/', function(err, data) {
-        if (!err & data && data.length > 0) {
+        if (!err && data && data.length > 0) {
             var trimmedFileNames = [];
             data.forEach(file => {
                 trimmedFileNames.push(file.replace('.json', ''));
