@@ -80,7 +80,7 @@ userRoutes._users.put = function(data, cb) {
     var sanitizedPhone = helpers.sanitizePhone(data.payload.phone);
     if (!sanitizedPhone) { return cb(500, { 'Error': 'Phone number is missing.' }); }
   
-      var phone = typeof sanitizedPhone === "string" && sanitizedPhone.length === 10 ? sanitizedPhone : false;
+    var phone = typeof sanitizedPhone === "string" && sanitizedPhone.length === 10 ? sanitizedPhone : false;
 
     // optional
     var firstName = typeof data.payload.firstName === "string" && data.payload.firstName.trim().length > 0 ? data.payload.firstName.trim() : false;

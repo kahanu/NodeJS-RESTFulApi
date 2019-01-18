@@ -66,11 +66,12 @@ helpers.createRandomString = function(strLength) {
  * @example Token: { token: 'usfafuh9o0759x4xwtoh' }
  * @example Phone: { phone: '8185552222' }
  */
-helpers.createTokenRequest = function(token, phone) {
+helpers.createTokenRequest = function(token, data) {
     var request = {};
 
     request.tokenId = token;
-    request.phone = phone;
+    // request.phone = phone;
+    request.data = data;
 
     return request;
 };
@@ -93,7 +94,8 @@ helpers.verifyToken = function (tokenRequest, dataService, cb) {
     dataService.read('tokens', tokenRequest.tokenId, function (err, tokenData) {
         if (!err && tokenData) {
             console.log('token is expired: ', tokenData.expires < Date.now());
-            if (tokenData.phone === tokenRequest.phone && tokenData.expires > Date.now()) {
+            // if (tokenData.phone === tokenRequest.phone && tokenData.expires > Date.now()) {
+            if (tokenData.data === tokenRequest.data && tokenData.expires > Date.now()) {
                 cb(true);
             } else {
                 cb(false);

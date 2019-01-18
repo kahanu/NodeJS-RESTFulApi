@@ -19,17 +19,44 @@ tokenRoutes._tokens.get = function(data, cb) {
   }
 };
 
-tokenRoutes._tokens.post = function(data, cb) {
-  var sanitizedPhone = helpers.sanitizePhone(data.payload.phone);
-  if (!sanitizedPhone) {
-    return cb(500, { 'Error': 'Phone number is missing.' });
+
+/**
+ * 2019-01-18 - New format for creating a token.  This provides more of a factory-type functionality to the creation of the token
+ * for multiple purposes.
+ * @example { "type": [phone|email], "data": [phone or email], "password": [user password] }
+ */
+tokenRoutes._tokens.post = function(request, cb) {
+  var tokenValue = "", dir = "";
+  var directory = {
+    phone: 'users',
+    email: 'pizza/users'
+  };
+
+  dir = directory[request.payload.type];
+
+  if (typeof request.payload.type === 'string' && request.payload.type.trim().length > 0) {
+    if (request.payload.type === 'phone') {
+      var sanitizedPhone = helpers.sanitizePhone(request.payload.data);
+      if (!sanitizedPhone) {
+        return cb(500, { 'Error': 'Phone number is missing.' });
+      }
+      tokenValue = typeof sanitizedPhone === 'string' && sanitizedPhone.length === 10 ? sanitizedPhone : false;   
+    } else if(request.payload.type === 'email') {
+      tokenValue = typeof request.payload.data === 'string' && request.payload.data.trim().length > 0 ? request.payload.data.trim() : false;
+    }
+  } else {
+    cb(400, { Error: 'Required token type is not set.' });
   }
+  // var sanitizedPhone = helpers.sanitizePhone(request.payload.phone);
+  // if (!sanitizedPhone) {
+  //   return cb(500, { 'Error': 'Phone number is missing.' });
+  // }
 
-  var phone = typeof sanitizedPhone === 'string' && sanitizedPhone.length === 10 ? sanitizedPhone : false;
-  var password = typeof data.payload.password === 'string' && data.payload.password.trim().length > 0 ? data.payload.password.trim() : false;
+  // var phone = typeof sanitizedPhone === 'string' && sanitizedPhone.length === 10 ? sanitizedPhone : false;
+  var password = typeof request.payload.password === 'string' && request.payload.password.trim().length > 0 ? request.payload.password.trim() : false;
 
-  if (phone && password) {
-    _data.read('users', phone, function(err, userData) {
+  if (tokenValue && password) {
+    _data.read(dir, tokenValue, function(err, userData) {
       if (!err && userData) {
         var hashedPassword = helpers.hash(password);
         if (hashedPassword === userData.hashedPassword) {
@@ -37,7 +64,7 @@ tokenRoutes._tokens.post = function(data, cb) {
           var tokenId = helpers.createRandomString(20);
           var expires = Date.now() + 1000 * 60 * 60;
           var token = {
-            phone: phone,
+            data: tokenValue,
             id: tokenId,
             expires: expires
           };

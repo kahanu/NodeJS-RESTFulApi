@@ -5,13 +5,13 @@ var userRoutes = {};
 userRoutes._users = {};
 
 userRoutes._users.get = function(data, cb) {
-  _data.read('pizza/menu', 'menu', function(err, data) {
+  _data.read("pizza/menu", "menu", function(err, data) {
     if (!err && data) {
-        cb(200, data);
+      cb(200, data);
     } else {
-        cb(404);
+      cb(404);
     }
-});
+  });
 };
 
 userRoutes._users.post = function(data, cb) {
@@ -23,7 +23,7 @@ userRoutes._users.post = function(data, cb) {
   var tosAgreement = typeof data.payload.tosAgreement === "boolean" && data.payload.tosAgreement === true ? true : false;
 
   if (firstName && lastName && email && address && password && tosAgreement) {
-    _data.read('pizza/users', email, function(err, response) {
+    _data.read("pizza/users", email, function(err, response) {
       if (err) {
         var hashedPassword = helpers.hash(password);
         if (hashedPassword) {
@@ -46,23 +46,41 @@ userRoutes._users.post = function(data, cb) {
           cb(500, { Error: "Could not hash the password." });
         }
       } else {
-        cb(400, { Error: 'User already exists!' });
+        cb(400, { Error: "User already exists!" });
       }
     });
     // cb(200, data);
   } else {
-    cb(400, { Error: 'Missing required fields.'});
+    cb(400, { Error: "Missing required fields." });
   }
-
 };
 
 userRoutes._users.put = function(data, cb) {
+  var firstName = typeof data.payload.firstName === "string" && data.payload.firstName.trim().length > 0 ? data.payload.firstName.trim() : false;
+  var lastName = typeof data.payload.lastName === "string" && data.payload.lastName.trim().length > 0 ? data.payload.lastName.trim() : false;
+  var email = typeof data.payload.email === "string" && data.payload.email.trim().length > 0 ? data.payload.email.trim() : false;
+  var address = typeof data.payload.address === "string" && data.payload.address.trim().length > 0 ? data.payload.address.trim() : false;
+  var password = typeof data.payload.password === "string" && data.payload.password.trim().length > 0 ? data.payload.password.trim() : false;
 
+  if (email) {
+    if (firstName || lastName || address || password) {
+      var tokenRequest = helpers.createTokenRequest(
+        data.headers.token,
+        sanitizedPhone
+      );
+      helpers.verifyToken(tokenRequest, _data, function(tokenIsValid) {
+        if (tokenIsValid) {
+        }
+      });
+    } else {
+      cb(400, { Error: "Missing optional fields to update." });
+    }
+  } else {
+    cb(400, { Error: "Missing required field (email)." });
+  }
 };
 
-userRoutes._users.delete = function(data, cb) {
-
-};
+userRoutes._users.delete = function(data, cb) {};
 
 userRoutes.users = function(data, cb) {
   var acceptableMethods = ["post", "get", "put", "delete"];
