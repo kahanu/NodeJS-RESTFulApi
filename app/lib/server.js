@@ -57,7 +57,6 @@ server.unifiedServer = function(req, res) {
             'headers': headers,
             'payload': helpers.parseJsonToObject(buffer)
         };
-
         chosenHandler(data, function(statusCode, payload) {
             statusCode = typeof(statusCode) === 'number' ? statusCode : 200;
             payload = typeof(payload) === 'object' ? payload : {};
