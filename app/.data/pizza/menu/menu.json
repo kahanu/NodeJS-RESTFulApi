@@ -1,0 +1,7 @@
+[
+    { "id": 1, "name": "Cheese", "price": 4.99 },
+    { "id": 2, "name": "Pepperoni", "price": 4.99 },
+    { "id": 3, "name": "Sausage", "price": 4.99 },
+    { "id": 4, "name": "Hawaiian", "price": 4.99 },
+    { "id": 5, "name": "Combo", "price": 4.99 }
+]

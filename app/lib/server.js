@@ -10,6 +10,7 @@ var greetingRoutes = require('./routes/greeting.routes');
 var userRoutes = require('./routes/user.routes');
 var tokenRoutes = require('./routes/token.routes');
 var checksRoutes = require('./routes/checks.routes');
+var pizzaRoutes = require('./routes/pizza/pizza.routes');
 var path = require('path');
 var util = require('util');
 var debug = util.debuglog('server');
@@ -48,7 +49,7 @@ server.unifiedServer = function(req, res) {
     req.on('end', function() {
         buffer += decoder.end();
         var chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : handlers.notFound;
-
+        console.log('trimmedPath: ', trimmedPath);
         var data = {
             'path': trimmedPath,
             'method': method,
@@ -84,7 +85,10 @@ server.router = {
     'hello': greetingRoutes.hello,
     'users': userRoutes.users,
     'token': tokenRoutes.tokens,
-    'checks': checksRoutes.checks
+    'checks': checksRoutes.checks,
+    'pizza/users': pizzaRoutes.users,
+    'pizza/menu': pizzaRoutes.menu,
+    'pizza/orders': pizzaRoutes.orders
 };
 
 server.init = function() {
