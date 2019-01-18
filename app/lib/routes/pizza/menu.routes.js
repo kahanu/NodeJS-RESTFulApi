@@ -1,16 +1,24 @@
 var _data = require("../../data");
+var helpers = require("../../helpers");
 
 var menuRoutes = {};
 menuRoutes._menus = {};
 
 menuRoutes._menus.get = function(data, cb) {
-    _data.read('pizza/menu', 'menu', function(err, data) {
-        if (!err && data) {
-            cb(200, data);
+    var tokenRequest = helpers.createTokenRequest(data.headers.token, data.queryString.email);
+  helpers.verifyToken(tokenRequest, _data, function(tokenIsValid) {
+    if (tokenIsValid) {
+      _data.read("pizza/menu", "menu", function(err, menuData) {
+        if (!err && menuData) {
+          cb(200, menuData);
         } else {
-            cb(404);
+          cb(404);
         }
-    });
+      });
+    } else {
+      cb(403);
+    }
+  });
 };
 
 menuRoutes.menus = function(data, cb) {

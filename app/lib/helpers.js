@@ -70,7 +70,6 @@ helpers.createTokenRequest = function(token, data) {
     var request = {};
 
     request.tokenId = token;
-    // request.phone = phone;
     request.data = data;
 
     return request;
@@ -90,11 +89,9 @@ helpers.getTokenFromHeader = function(data) {
  * @param cb The callback.
  */
 helpers.verifyToken = function (tokenRequest, dataService, cb) {
-    // console.log('token request: ', tokenRequest);
     dataService.read('tokens', tokenRequest.tokenId, function (err, tokenData) {
         if (!err && tokenData) {
             console.log('token is expired: ', tokenData.expires < Date.now());
-            // if (tokenData.phone === tokenRequest.phone && tokenData.expires > Date.now()) {
             if (tokenData.data === tokenRequest.data && tokenData.expires > Date.now()) {
                 cb(true);
             } else {

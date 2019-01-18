@@ -47,12 +47,6 @@ tokenRoutes._tokens.post = function(request, cb) {
   } else {
     cb(400, { Error: 'Required token type is not set.' });
   }
-  // var sanitizedPhone = helpers.sanitizePhone(request.payload.phone);
-  // if (!sanitizedPhone) {
-  //   return cb(500, { 'Error': 'Phone number is missing.' });
-  // }
-
-  // var phone = typeof sanitizedPhone === 'string' && sanitizedPhone.length === 10 ? sanitizedPhone : false;
   var password = typeof request.payload.password === 'string' && request.payload.password.trim().length > 0 ? request.payload.password.trim() : false;
 
   if (tokenValue && password) {

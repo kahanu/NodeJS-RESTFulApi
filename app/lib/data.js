@@ -46,7 +46,8 @@ lib.create = function(dir, file, data, cb) {
 };
 
 lib.read = function(dir, file, cb) {
-    fs.readFile(lib.baseDir + dir + '/' + file + '.json', 'utf8', function(err, data) {
+    var path = lib.baseDir + dir + '/' + file + '.json';
+    fs.readFile(path, 'utf8', function(err, data) {
         if (!err && data) {
             var parsedData = helpers.parseJsonToObject(data);
             cb(false, parsedData);
