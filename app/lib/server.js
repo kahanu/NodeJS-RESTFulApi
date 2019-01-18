@@ -11,6 +11,8 @@ var userRoutes = require('./routes/user.routes');
 var tokenRoutes = require('./routes/token.routes');
 var checksRoutes = require('./routes/checks.routes');
 var path = require('path');
+var util = require('util');
+var debug = util.debuglog('server');
 
 var server = {};
 
@@ -64,7 +66,12 @@ server.unifiedServer = function(req, res) {
             res.setHeader('Content-Type', 'application/json');
             res.writeHead(statusCode);
             res.end(payloadString);
-            console.log('Returning response: ', statusCode, payloadString);
+
+            if (statusCode === 200) {
+                debug('\x1b[32m%s\x1b[0m', method.toUpperCase() + ' /' + trimmedPath + ' ' + statusCode);
+            } else {
+                debug('\x1b[31m%s\x1b[0m', method.toUpperCase() + ' /' + trimmedPath + ' ' + statusCode);
+            }
         });
     }); 
 };
@@ -82,11 +89,11 @@ server.router = {
 
 server.init = function() {
     server.httpServer.listen(config.httpPort, function() {
-        console.log(`Http server listening on port ${config.httpPort}.`);
+        console.log('\x1b[35m%s\x1b[0m', `Http server listening on port ${config.httpPort}.`);
     });
 
     server.httpsServer.listen(config.httpsPort, function() {
-        console.log(`Https server listening on port ${config.httpsPort}.`);
+        console.log('\x1b[36m%s\x1b[0m', `Https server listening on port ${config.httpsPort}.`);
     });
 };
 
