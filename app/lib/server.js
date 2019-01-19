@@ -88,7 +88,8 @@ server.router = {
     'checks': checksRoutes.checks,
     'pizza/users': pizzaRoutes.users,
     'pizza/menu': pizzaRoutes.menu,
-    'pizza/orders': pizzaRoutes.orders
+    'pizza/orders': pizzaRoutes.orders,
+    'pizza/cart': pizzaRoutes.cart
 };
 
 server.init = function() {
